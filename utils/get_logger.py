@@ -10,7 +10,6 @@ def get_logger(log_path, name, save_file=False, console_out=False, json_file=Fal
 
     logger = logging.getLogger(name='Jidi')
     logger.setLevel(logging.INFO)
-    # 每分钟建一个文件
     rq = time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
     log_name = log_path + rq + '_' + name+  '.log'
     json_log_name = log_path + rq + '_' + name + '.json'
@@ -21,13 +20,11 @@ def get_logger(log_path, name, save_file=False, console_out=False, json_file=Fal
         formatter = logging.Formatter("%(message)s")
         fh.setFormatter(formatter)
         logger.addHandler(fh)
-    # 输出到控制台
     if console_out:
         console = logging.StreamHandler()
         console.setLevel(logging.INFO)
         logger.addHandler(console)
 
-    # 输出到json
     if json_file:
         fh_json = logging.FileHandler(json_log_name, mode='a')
         fh_json.setLevel(logging.DEBUG)

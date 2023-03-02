@@ -1,7 +1,4 @@
 # -*- coding:utf-8  -*-
-# 作者：zruizhi   
-# 创建时间： 2020/7/10 10:24 上午   
-# 描述：
 
 from PIL import Image, ImageDraw
 from itertools import count
@@ -34,17 +31,16 @@ class GridGame(Game):
         self.ob_vector_shape = conf['ob_vector_shape'] if not conf.get('ob_vector_shape') is None else [self.board_width*self.board_height*self.cell_dim for _ in range(self.n_player)]
         self.ob_vector_range = conf['ob_vector_range'] if not conf.get('ob_vector_range') is None else [self.cell_range for _ in range(self.n_player)]
 
-        # 每个玩家的 action space list, 可以根据player_id获取对应的single_action_space
+        # action space list
         self.joint_action_space = self.set_action_space()
 
-        # global state，每个step需维护此项，并根据此项定义render data 及 observation
+        # global state
         self.current_state = None
 
-        # 记录对局结果信息
         self.n_return = [0] * self.n_player
         self.won = ''
 
-        # render 相关
+        # render 
         self.grid_unit = unit_size
         self.grid = GridGame.init_board(self.board_width, self.board_height, unit_size)
         self.grid_unit_fix = fix
@@ -104,13 +100,13 @@ class GridGame(Game):
         not_valid = 0
         w, h, cell_range = self.get_grid_obs_config(player_id)
         if len(obs) != h or len(obs[0]) != w or len(obs[0][0]) != len(cell_range):
-            raise Exception("obs 维度不正确！", obs)
+            raise Exception("obs not valid", obs)
 
         for i in range(h):
             for j in range(w):
                 for k in range(len(cell_range)):
                     if obs[i][j][k] not in range(cell_range[k]):
-                        raise Exception("obs 单元值不正确！", obs[i][j][k])
+                        raise Exception("obs not valid", obs[i][j][k])
 
         return not_valid
 
@@ -118,11 +114,11 @@ class GridGame(Game):
         not_valid = 0
         shape, vector_range = self.get_vector_obs_config(player_id)
         if len(obs) != shape or len(vector_range) != shape:
-            raise Exception("obs 维度不正确！", obs)
+            raise Exception("obs not valid", obs)
 
         for i in range(shape):
             if obs[i] not in range(vector_range[i]):
-                raise Exception("obs 单元值不正确！", obs[i])
+                raise Exception("obs not valid", obs[i])
 
         return not_valid
 
@@ -171,10 +167,6 @@ class GridGame(Game):
 
     @staticmethod
     def _render_board(state, board, colors, unit, fix, extra_info=None):
-        '''
-            完成基本渲染棋盘操作
-            设置extra_info参数仅为了保持子类方法签名的一致
-        '''
         im = board.copy()
         draw = ImageDraw.Draw(im)
         for x, row in zip(count(0), state):

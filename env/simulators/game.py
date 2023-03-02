@@ -1,7 +1,4 @@
 # -*- coding:utf-8  -*-
-# 作者：zruizhi   
-# 创建时间： 2020/7/10 10:24 上午   
-# 描述：
 from abc import ABC, abstractmethod
 
 

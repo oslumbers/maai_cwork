@@ -1,7 +1,4 @@
 # -*- coding:utf-8  -*-
-# 作者：zruizhi   
-# 创建时间： 2020/7/30 17:24 下午
-# 描述：
 from env.simulators.gridgame import GridGame
 import random
 from itertools import count
@@ -17,23 +14,20 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
         self.terminate_flg = False
         colors = conf.get('colors', [(255, 255, 255), (255, 140, 0)])
         super(SnakeEatBeans, self).__init__(conf, colors)
-        # 0: 没有 1：食物 2-n_player+1:各玩家蛇身
         self.n_cell_type = self.n_player + 2
         self.step_cnt = 1
         self.n_beans = int(conf['n_beans'])
-        # 方向[-2,2,-1,1]分别表示[上，下，左，右]
         self.actions = [-2, 2, -1, 1]
         self.actions_name = {-2: "up", 2: "down", -1: "left", 1: "right"}
         self.snakes_position = {}
         self.players = []
         self.cur_bean_num = 0
         self.beans_position = []
-        # 1<= init_len <= 3
         self.init_len = 3
         self.current_state = self.init_state()
         self.all_observes = self.get_all_observes()
         if self.n_player * self.init_len > self.board_height * self.board_width:
-            raise Exception("玩家数量过多：%d，超出board范围：%d，%d" % (self.n_player, self.board_width, self.board_height))
+            raise Exception("Snakes are too big for the board" % (self.n_player, self.board_width, self.board_height))
 
         self.input_dimension = self.board_width * self.board_height
         self.action_dim = self.get_action_dim()
@@ -136,7 +130,6 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
             for pos in v:
                 if cur_head == pos:
                     is_hit = True
-                    # print("hit:", cur_head, snakes_position)
                     break
             if is_hit:
                 break
@@ -177,22 +170,18 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
         before_info = self.step_before_info()
         not_valid = self.is_not_valid_action(all_action)
         if not not_valid:
-            # 各玩家行动
-            # print("current_state", self.current_state)
             eat_snakes = [0] * self.n_player
             for i in range(self.n_player):
                 snake = self.players[i]
                 act = self.actions[all_action[i][0].index(1)]
-                # print(snake.player_id, "此轮的动作为：", self.actions_name[act])
                 snake.change_direction(act)
                 snake.move_and_add(self.snakes_position)
-                if self.be_eaten(snake.headPos):  # @yanxue
+                if self.be_eaten(snake.headPos):  
                     snake.snake_reward = 1
                     eat_snakes[i] = 1
                 else:
                     snake.snake_reward = 0
                     snake.pop()
-                # print(snake.player_id, snake.segments)   # @yanxue
             snake_position = [[-1] * self.board_width for _ in range(self.board_height)]
             re_generatelist = [0] * self.n_player
             for i in range(self.n_player):
@@ -202,10 +191,10 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
                     x = segment[j][0]
                     y = segment[j][1]
                     if snake_position[x][y] != -1:
-                        if j == 0:  # 撞头
+                        if j == 0:  
                             re_generatelist[i] = 1
                         compare_snake = self.players[snake_position[x][y]]
-                        if [x, y] == compare_snake.segments[0]:  # 两头相撞
+                        if [x, y] == compare_snake.segments[0]:  
                             re_generatelist[snake_position[x][y]] = 1
                     else:
                         snake_position[x][y] = i
@@ -223,8 +212,6 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
                     snake = self.clear_or_regenerate(snake)
                 self.snakes_position[snake.player_id] = snake.segments
                 snake.score = snake.get_score()
-            # yanxue add
-            # 更新状态
             self.generate_beans()
 
             next_state = self.update_state()
@@ -266,13 +253,10 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
                             for i in range(4):
                                 nx = (direct_x[i] + cur[0]) % self.board_height
                                 ny = (direct_y[i] + cur[1]) % self.board_width
-                                # if nx < 0 or nx >= self.board_height or ny < 0 or ny >= self.board_width:
-                                #     continue
                                 if grid[nx][ny] == 0 and [nx, ny] not in q:
                                     grid[nx][ny] = 1
                                     q.append([nx, ny])
                             if len(seg) == self.init_len:
-                                # print("regenerate")
                                 if len(seg) < 3:
                                     snake.direction = random.choice(self.actions)
                                 elif len(seg) == 3:
@@ -282,49 +266,31 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
                                     snake.segments = seg
                                     snake.headPos = seg[0]
                                     if seg[0][0] == seg[1][0]:
-                                        # 右
                                         if seg[0][1] > seg[1][1]:
                                             snake.direction = 1
-                                        # 左
                                         else:
                                             snake.direction = -1
                                     elif seg[0][1] == seg[1][1]:
-                                        # 下
                                         if seg[0][0] > seg[1][0]:
                                             snake.direction = 2
-                                        # 上
                                         else:
                                             snake.direction = -2
-                                # print("re head", snake.headPos)  # 输出重新生成的蛇
-                                # print("re snakes segments", snake.segments)
                                 return True
-            # print("clear")
             return False
 
         flg = can_regenerate()
         if not flg:
             self.terminate_flg = True
-        # print(self.terminate_flg)
         return snake
-
-    # def is_not_valid_action(self, joint_action):
-    #     not_valid = 0
-    #     if len(joint_action) != self.n_player:
-    #         raise Exception("joint action 维度不正确！", len(joint_action))
-    #
-    #     for i in range(len(joint_action)):
-    #         if len(joint_action[i][0]) != 4:
-    #             raise Exception("玩家%d joint action维度不正确！" % i, joint_action[i])
-    #     return not_valid
 
     def is_not_valid_action(self, all_action):
         not_valid = 0
         if len(all_action) != self.n_player:
-            raise Exception("all action 维度不正确！", len(all_action))
+            raise Exception("Invalid actions", len(all_action))
 
         for i in range(self.n_player):
             if len(all_action[i][0]) != 4:
-                raise Exception("玩家%d joint action维度不正确！" % i, all_action[i])
+                raise Exception("Invalid joint actions" % i, all_action[i])
         return not_valid
 
     def get_reward(self, all_action):
@@ -332,12 +298,10 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
         for i in range(self.n_player):
             r[i] = self.players[i].snake_reward
             self.n_return[i] += r[i]
-        # print("score:", self.won)
         return r
 
     def is_terminal(self):
         all_member = self.n_beans
-        # all_member = len(self.beans_position)
         for s in self.players:
             all_member += len(s.segments)
         is_done = self.step_cnt > self.max_step or all_member > self.board_height * self.board_width
@@ -347,13 +311,13 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
     def encode(self, actions):
         joint_action = self.init_action_space()
         if len(actions) != self.n_player:
-            raise Exception("action输入维度不正确！", len(actions))
+            raise Exception("Invalid actions", len(actions))
         for i in range(self.n_player):
             joint_action[i][0][int(actions[i])] = 1
         return joint_action
 
     def get_terminal_actions(self):
-        print("请输入%d个玩家的动作方向[0-3](上下左右)，空格隔开：" % self.n_player)
+        print("Terminal actions %d：" % self.n_player)
         cur = input()
         actions = cur.split(" ")
         return self.encode(actions)
@@ -378,19 +342,16 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
         s = ', '.join(cols)
         print('  ', s)
         for i in range(self.board_height):
-            # print(i)
             print(chr(i + 65), self.current_state[i])
 
     @staticmethod
     def _render_board(state, board, colors, unit, fix, extra_info):
         im = GridGame._render_board(state, board, colors, unit, fix)
         draw = ImageDraw.Draw(im)
-        fnt = ImageFont.truetype("Courier.dfont", 16)
         for i, pos in zip(count(1), extra_info):
             x, y = pos
             draw.text(((y + 1 / 4) * unit, (x + 1 / 4) * unit),
                       "#{}".format(i),
-                      font=fnt,
                       fill=(0, 0, 0))
 
         return im
@@ -405,8 +366,6 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
 
     @staticmethod
     def parse_extra_info(data):
-        # return eval(re.search(r'({.*})', data['info_after']).group(1)).values()
-        # d = (eval(eval(data)['snakes_position']).values())
         if isinstance(data, str):
             d = eval(data)['snakes_position']
         else:
@@ -419,7 +378,7 @@ class Snake():
     def __init__(self, player_id, board_width, board_height, init_len):
         self.actions = [-2, 2, -1, 1]
         self.actions_name = {-2: "up", 2: "down", -1: "left", 1: "right"}
-        self.direction = random.choice(self.actions)  # 方向[-2,2,-1,1]分别表示[上，下，左，右]
+        self.direction = random.choice(self.actions)  
         self.board_width = board_width
         self.board_height = board_height
         x = random.randrange(0, board_height)
@@ -442,10 +401,7 @@ class Snake():
             while n_direct + self.direction == 0:
                 n_direct = random.choice(self.actions)
             self.direction = n_direct
-        #     print("方向不合法，重新生成")
-        # print("direction", self.actions_name[self.direction])
 
-    # 超过边界，可以穿越
     def update_position(self, position):
         position[0] %= self.board_height
         position[1] %= self.board_width
@@ -453,27 +409,20 @@ class Snake():
 
     def move_and_add(self, snakes_position):
         cur_head = list(self.headPos)
-        # 根据方向移动蛇头的坐标
-        #     右
         if self.direction == 1:
             cur_head[1] += 1
-        #     左
         if self.direction == -1:
             cur_head[1] -= 1
-        #     上
         if self.direction == -2:
             cur_head[0] -= 1
-        #     下
         if self.direction == 2:
             cur_head[0] += 1
 
         cur_head = self.update_position(cur_head)
-        # print("cur head", cur_head)
-        # print("cur snakes positions", snakes_position)
 
         self.segments.insert(0, cur_head)
         self.headPos = self.segments[0]
         return cur_head
 
     def pop(self):
-        self.segments.pop()  # 在蛇尾减去一格
+        self.segments.pop() 
