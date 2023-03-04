@@ -121,13 +121,29 @@ class GridGame(Game):
                 raise Exception("obs not valid", obs[i])
 
         return not_valid
+    
+    def convert_to_grid_observation(self, all_observes):
+        pos = {1: [], 2: [], 3: []}
+
+        for i in range(3):
+            pos[i+1].extend(all_observes[0][i+1])
+
+        grid = np.zeros((6, 8), dtype=int)
+
+        # Set the values at the coordinate points of each player to the player's ID
+        for player_id, coords in pos.items():
+            for coord in coords:
+                grid[coord[0], coord[1]] = player_id
+
+        return grid.flatten()
 
     def step(self, joint_action):
         info_before = self.step_before_info()
         all_observes, info_after = self.get_next_state(joint_action)
+        obs = self.convert_to_grid_observation(all_observes)
         done = self.is_terminal()
         reward = self.get_reward(joint_action)
-        return all_observes, reward, done, info_before, info_after
+        return obs, all_observes, reward, done, info_before, info_after
 
     def step_before_info(self, info=''):
         return info

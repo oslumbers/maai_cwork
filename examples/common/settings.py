@@ -2,7 +2,7 @@
 # Time  : 2021/07/26 12:00
 # Author: Yutong Wu
 
-import attr, cattr
+import attrs, cattrs
 import copy
 import os
 import yaml
@@ -11,19 +11,19 @@ from types import SimpleNamespace as SN
 from typing import Dict, Any
 
 
-@attr.s(auto_attribs=True)
+@attrs.s(auto_attribs=True)
 class HyperparamSettings:
     use_network: bool = True
     marl: bool = False
 
 
-@attr.s(auto_attribs=True)
+@attrs.s(auto_attribs=True)
 class ExportableSettings:
     def as_dict(self):
-        return cattr.unstructure(self)
+        return cattrs.unstructure(self)
 
 
-@attr.s(auto_attribs=True)
+@attrs.s(auto_attribs=True)
 class TABULARQSettings(HyperparamSettings):
     lr: float = 0.1
     buffer_capacity: int = 1
@@ -35,7 +35,7 @@ class TABULARQSettings(HyperparamSettings):
     use_network: bool = False
 
 
-@attr.s(auto_attribs=True)
+@attrs.s(auto_attribs=True)
 class SARSASettings(HyperparamSettings):
     lr: float = 0.1
     buffer_capacity: int = 1
@@ -47,7 +47,7 @@ class SARSASettings(HyperparamSettings):
     use_network: bool = False
 
 
-@attr.s(auto_attribs=True)
+@attrs.s(auto_attribs=True)
 class DQNSettings(HyperparamSettings):
     c_lr: float = 0.005
     buffer_capacity: int = 1024

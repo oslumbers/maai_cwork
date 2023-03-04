@@ -1,3 +1,3 @@
 
-# **MAAI Corsework**            
+# **MAAI Coursework**            
 

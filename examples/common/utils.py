@@ -12,6 +12,7 @@ import numpy as np
 
 
 def make_env(args):
+    print(args)
     base_dir = Path(__file__).resolve().parent.parent.parent
     sys.path.append(str(base_dir))
     env_wrapper_file_name = str("EnvWrapper." + str(args.scenario.replace("-", "_")))

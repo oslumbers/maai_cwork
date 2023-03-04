@@ -6,6 +6,7 @@ import numpy as np
 from PIL import ImageDraw, ImageFont
 from env.obs_interfaces.observation import *
 from utils.discrete import Discrete
+from utils.box import Box
 import itertools
 
 
@@ -25,12 +26,15 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
         self.beans_position = []
         self.init_len = 3
         self.current_state = self.init_state()
+        self.obs = np.array(self.current_state).flatten()
         self.all_observes = self.get_all_observes()
         if self.n_player * self.init_len > self.board_height * self.board_width:
             raise Exception("Snakes are too big for the board" % (self.n_player, self.board_width, self.board_height))
 
         self.input_dimension = self.board_width * self.board_height
         self.action_dim = self.get_action_dim()
+        self.observation_space = Box(low=0, high=3, shape=(self.board_height * self.board_width, ), dtype=np.int32)
+        self.action_space = Discrete(4)
 
     def check_win(self):
         flg = self.won.index(max(self.won)) + 2
@@ -65,8 +69,9 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
         self.current_state = self.init_state()
         self.all_observes = self.get_all_observes()
         self.terminate_flg = False
+        self.obs = np.array(self.current_state).flatten()
 
-        return self.all_observes
+        return self.obs
 
     def init_state(self):
         for i in range(self.n_player):

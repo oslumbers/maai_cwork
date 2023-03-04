@@ -205,7 +205,8 @@ def run_game(g, env_name, multi_part_agent_ids, actions_spaces, policy_list, log
 
         info_dict = {"time": time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))}
         joint_act = get_joint_action_eval(g, multi_part_agent_ids, policy_list, actions_spaces, all_observes)
-        all_observes, reward, done, info_before, info_after = g.step(joint_act)
+        print(joint_act)
+        obs, all_observes, reward, done, info_before, info_after = g.step(joint_act)
         if log_mode:
             if hasattr(g, "render") and g.game_name.split("_")[0] == 'logistics':
                 g.render()

@@ -1,4 +1,4 @@
-from runner import Runner
+#from runner import Runner
 import argparse
 
 if __name__ == "__main__":
@@ -19,6 +19,11 @@ if __name__ == "__main__":
 
     print("================== args: ", args)
     print("== args.reload_config: ", args.reload_config)
+
+    print(args)
+
+    from common.utils import make_env
+    make_env(args)
 
     runner = Runner(args)
     runner.run()
