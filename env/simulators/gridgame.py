@@ -139,7 +139,7 @@ class GridGame(Game):
 
     def step(self, joint_action):
         info_before = self.step_before_info()
-        all_observes, info_after = self.get_next_state(joint_action)
+        all_observes, info_after = self.get_next_state(joint_action)            #1: location of beans; 2&3: location of snakes
         obs = self.convert_to_grid_observation(all_observes)
         done = self.is_terminal()
         reward = self.get_reward(joint_action)

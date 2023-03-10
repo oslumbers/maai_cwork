@@ -9,6 +9,8 @@ from utils.discrete import Discrete
 from utils.box import Box
 import itertools
 
+import pygame
+
 
 class SnakeEatBeans(GridGame, GridObservation, DictObservation):
     def __init__(self, conf):
@@ -35,6 +37,8 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
         self.action_dim = self.get_action_dim()
         self.observation_space = Box(low=0, high=3, shape=(self.board_height * self.board_width, ), dtype=np.int32)
         self.action_space = Discrete(4)
+
+        self.screen = None
 
     def check_win(self):
         flg = self.won.index(max(self.won)) + 2
@@ -70,7 +74,7 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
         self.all_observes = self.get_all_observes()
         self.terminate_flg = False
         self.obs = np.array(self.current_state).flatten()
-
+        self.screen = None
         return self.obs
 
     def init_state(self):
@@ -171,7 +175,7 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
 
         return self.all_observes
 
-    def get_next_state(self, all_action):
+    def get_next_state(self, all_action):       #coordinates of all objects in the map
         before_info = self.step_before_info()
         not_valid = self.is_not_valid_action(all_action)
         if not not_valid:
@@ -368,6 +372,19 @@ class SnakeEatBeans(GridGame, GridObservation, DictObservation):
                                         extra_info))
         self.game_tape.append(im_data)
         return im_data
+
+    def render(self, fps=3):
+        if self.screen is None:
+            pygame.init()
+            self.screen = pygame.display.set_mode(self.grid.size)
+            pygame.display.set_caption(self.game_name)
+            self.clock = pygame.time.Clock()
+
+        pygame.surfarray.blit_array(self.screen, self.render_board().transpose(1,0,2))
+        pygame.display.flip()
+        self.clock.tick(fps)
+
+
 
     @staticmethod
     def parse_extra_info(data):

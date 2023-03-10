@@ -82,7 +82,7 @@ def set_seed(g, env_name):
         g.set_seed(seed)
 
 
-def render_game(g, fps=1):
+def render_game(g, fps=3):
     """
     This function is used to generate log for pygame rendering locally and render in time.
     The higher the fps, the faster the speed for rendering next step.
@@ -99,7 +99,7 @@ def render_game(g, fps=1):
         if policy_list[i] not in get_valid_agents():
             raise Exception("agent {} not valid!".format(policy_list[i]))
 
-        file_path = os.path.dirname(os.path.abspath(__file__)) + "/examples/algo/" + policy_list[i] + "/submission.py"
+        file_path = os.path.dirname(os.path.abspath(__file__)) + "/examples/" + policy_list[i] + "/submission.py"
         if not os.path.exists(file_path):
             raise Exception("file {} not exist!".format(file_path))
 
@@ -125,7 +125,7 @@ def render_game(g, fps=1):
         game_info[step] = {}
         game_info[step]["time"] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time()))
         joint_act = get_joint_action_eval(g, multi_part_agent_ids, policy_list, actions_space, all_observes)
-        next_state, reward, done, info_before, info_after = g.step(joint_act)
+        next_state, all_state, reward, done, info_before, info_after = g.step(joint_act)
         if info_before:
             game_info[step]["info_before"] = info_before
         game_info[step]["joint_action"] = str(joint_act)
@@ -163,7 +163,7 @@ def run_game(g, env_name, multi_part_agent_ids, actions_spaces, policy_list, log
         if policy_list[i] not in get_valid_agents():
             raise Exception("agent {} not valid!".format(policy_list[i]))
 
-        file_path = os.path.dirname(os.path.abspath(__file__)) + "/examples/algo/" + policy_list[i] + "/submission.py"
+        file_path = os.path.dirname(os.path.abspath(__file__)) + "/examples/" + policy_list[i] + "/submission.py"
         if not os.path.exists(file_path):
             raise Exception("file {} not exist!".format(file_path))
 
@@ -230,5 +230,22 @@ def run_game(g, env_name, multi_part_agent_ids, actions_spaces, policy_list, log
 
 
 def get_valid_agents():
-    dir_path = os.path.join(os.path.dirname(__file__), 'examples', 'algo')
+    dir_path = os.path.join(os.path.dirname(__file__), 'examples')
     return [f for f in os.listdir(dir_path) if f != "__pycache__"]
+
+
+# if __name__ == "__main__":
+#     env_type = 'snakes_1v1'
+#     game = make(env_type)
+#
+#     policy_list = ['random'] * len(game.agent_nums)
+#     multi_part_agent_ids, actions_space = get_players_and_action_space_list(game)
+#
+#     RENDER=False
+#
+#     if RENDER:
+#         render_game(game)
+#     else:
+#         run_game(game, env_type, multi_part_agent_ids, actions_space, policy_list, True)
+
+
