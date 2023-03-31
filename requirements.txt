@@ -1,5 +1,5 @@
 matplotlib==3.3.4
-gym==0.18.3
+gym==0.25.2
 pillow==8.2.0
 numpy==1.19.5
 cattrs==1.0.0
